@@ -4,7 +4,6 @@ user   = require '../../models/user'
 helper = require '../helpers'
 
 router.post '/signup', (req, res, next) =>
-	
 	data = {
 		name: req.body.name
 		username: req.body.username
@@ -18,7 +17,6 @@ router.post '/signup', (req, res, next) =>
 		helper.jsonResponse res, false, err, 401, []
 	
 router.post '/signin', (req, res, next) =>
-
 	data = {
 		username: req.body.username
 		password: req.body.password

@@ -48,7 +48,7 @@ router.get '/like/article', (req, res, next) =>
     user.find({ "username": req.decoded.username }).then (response) =>
       return helper.jsonResponse res, false, "Wrong data", 401, [] if response == [] or response == null
 
-      return helper.jsonResponse res, false, "You don't have much coins to do that", 403, [] if response.coins < 50
+      return helper.jsonResponse res, false, "You don't have much coins to do that", 403, { coins: response.coins } if response.coins < 50
 
       post.update({ "_id": require('mongoose').Types.ObjectId(req.query.id) }, { $inc: { 'likes': 1 } }).then (article) =>
         return helper.jsonResponse res, false, "Eternal error", 400, [] if article == []
@@ -56,7 +56,13 @@ router.get '/like/article', (req, res, next) =>
         coins = 0
         coins = response.coins - 50 if response.coins >= 50
         user.update({ "username": req.decoded.username }, { $set: { 'coins': coins } }).then (user) =>
-          helper.jsonResponse res, true, "#{req.decoded.username} spent 50 coins", 200, { coins: user.coins }
+          return helper.jsonResponse res, true, "#{req.decoded.username} spent 50 coins", 200, { coins: user.coins } if article.author == user.username
+
+          user.update({ "username": article.author }, { $inc: { coins: 50 } }).then (author) =>
+            helper.jsonResponse res, true, "#{req.decoded.username} spent 50 coins", 200, { coins: user.coins }
+          .catch (err) =>
+            helper.jsonResponse res, false, err, 403, []
+
         .catch (err) =>
           helper.jsonResponse res, false, err, 403, []
 
@@ -78,7 +84,7 @@ router.get '/like/comment', (req, res, next) =>
     user.find({ "username": req.decoded.username }).then (response) =>
       return helper.jsonResponse res, false, "Wrong data", 401, [] if response == [] or response == null
 
-      return helper.jsonResponse res, false, "You don't have much coins to do that", 403, [] if response.coins < 10
+      return helper.jsonResponse res, false, "You don't have much coins to do that", 403, { coins: response.coins } if response.coins < 10
 
       comment.update({ "_id": require('mongoose').Types.ObjectId(req.query.id) }, { $inc: { 'likes': 1 } } ).then (comment) =>
         return helper.jsonResponse res, false, "Eternal error", 400, [] if comment == []
@@ -86,7 +92,13 @@ router.get '/like/comment', (req, res, next) =>
         coins = 0
         coins = response.coins - 10 if response.coins >= 10
         user.update({ "username": req.decoded.username }, { $set: { 'coins': coins } }).then (user) =>
-          helper.jsonResponse res, true, "#{req.decoded.username} spent 50 coins", 200, { coins: user.coins }
+          return helper.jsonResponse res, true, "#{req.decoded.username} spent 10 coins", 200, { coins: user.coins } if comment.author == user.username
+
+          user.update({ "username": comment.author }, { $inc: { coins: 50 } }).then (author) =>
+            helper.jsonResponse res, true, "#{req.decoded.username} spent 10 coins", 200, { coins: user.coins }
+          .catch (err) =>
+            helper.jsonResponse res, false, err, 403, []
+
         .catch (err) =>
           helper.jsonResponse res, false, err, 403, []
 
