@@ -34,14 +34,17 @@ class PostModel
 
   # Updating Post model in DB
   #
-  # @param [Object] data Post data
-  update: (data) =>
+  # @param [Object] data  Post data
+  # @param [Object] query Updating query
+  update: (query, data) =>
     return new Promise (fulfill, reject) =>
       return reject "Wrong data" if not data?
 
-      @post.findOneAndUpdate({ "title": data.title }, data).exec (err, post) =>
-        return reject "Wrong data!" if err? || not post?
-        fulfill "Post #{data.title} has been updated!"
+      @post.findOneAndUpdate(query, data).exec (err, post) =>
+        return reject err if err?
+        return reject "Wrong data!" if post == null || not post?
+
+        fulfill post
 
 
   # Deleting Post model in DB

@@ -56,6 +56,7 @@ router.get '/:id', auth, (req, res, next) =>
     helper.jsonResponse res, false, err, 401, []
 
 
+
 # Update post by id
 #
 # PUT /posts/<id>
@@ -73,7 +74,7 @@ router.put '/:id', (req, res, next) =>
     response = response[0]
     return helper.jsonResponse res, false, "Wrong user data", 402, [] if response.author != req.decoded.username
 
-    post.update(data).then (response) =>
+    post.update({ "author": data.author }, data).then (response) =>
       helper.jsonResponse res, true, "Post has been updated", 200, response
     .catch (err) =>
       helper.jsonResponse res, false, err, 401, []

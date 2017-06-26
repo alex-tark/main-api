@@ -35,13 +35,15 @@ class CommentModel
   # Updating Comment model in DB
   #
   # @param [Object] data Comment data
-  update: (data) =>
+  update: (query, data) =>
     return new Promise (fulfill, reject) =>
       return reject "Wrong data" if not data?
 
-      @comment.findOneAndUpdate({ "_id": require('mongoose').Types.ObjectId(data._id) }, data).exec (err, comment) =>
-        return reject "Wrong data" if err? || not comment?
-        fulfill "Comment #{data.title} has been updated!"
+      @comment.findOneAndUpdate(query, data).exec (err, comment) =>
+        return reject err if err?
+        return reject "Wrong data" if comment == null || not comment?
+
+        fulfill comment
 
 
   # Deleting Comment model in DB

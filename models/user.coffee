@@ -34,8 +34,9 @@ class UserModel
 		return new Promise (fulfill, reject) =>
 			return fulfill "Wrong data" if not query?
 			
-			@user.findOne(query).select([ "name", "username", "email" ]).exec (err, user) =>
-				return reject "Username #{username} is not defined!" if err? || not user?
+			@user.findOne(query).select([ "name", "username", "email", "coins" ]).exec (err, user) =>
+				return reject err if err?
+				return reject "Wrong query data" if user == []
 				
 				fulfill user
 	
@@ -62,13 +63,14 @@ class UserModel
 	
 	# Updating User model in DB
 	#
-	# @param [Object] data User data 
-	update: (data) =>
+	# @param [Object] data  User data
+	# @param [Object[ query Update query
+	update: (query, data) =>
 		return new Promise (fulfill, reject) =>
 			return reject "Wrong data" if not data?
 			
-			@user.findOneAndUpdate({ "username": data.username }, data).select("password").exec (err, user) =>
+			@user.findOneAndUpdate(query, data).exec (err, user) =>
 				return reject "Wrong data!" if err?
-				fulfill "User #{data.username} has been updated!" 
+				fulfill user
 
 module.exports = new UserModel require('../db').UserModel
